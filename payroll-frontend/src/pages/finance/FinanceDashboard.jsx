@@ -200,13 +200,13 @@ const FinanceDashboard = () => {
         }
         extra={
           <Space>
-            <Button
+            {/* <Button
               icon={<DownloadOutlined />}
               onClick={handleDownloadPDF}
               disabled={transactions.length === 0}
             >
               Export PDF
-            </Button>
+            </Button> */}
             <Button
               type="primary"
               icon={<PlusOutlined />}
