@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
   };
 
   const isAdmin = () => {
-    return user && user.role === 'admin';
+    return user && user.role !== 'admin';
   };
 
   return (

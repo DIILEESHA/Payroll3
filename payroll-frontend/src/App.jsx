@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { Layout, Spin } from 'antd';
+import { Layout } from 'antd';
 import { AuthProvider, useAuth } from './utils/auth';
 import Header from './components/layout/Header';
 import Sidebar from './components/layout/Sidebar';
@@ -20,18 +20,19 @@ const { Content } = Layout;
 
 const ProtectedRoute = ({ children, adminOnly = false }) => {
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
-  if (adminOnly && !user.role === 'admin') {
+  // Ensure the user has a role and it's checked against 'admin'
+  if (adminOnly && user.role !== "admin") {
     return <Navigate to="/" replace />;
   }
 
   return children;
 };
+
 
 function AppContent() {
   const [collapsed, setCollapsed] = useState(false);

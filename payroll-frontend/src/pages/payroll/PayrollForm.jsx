@@ -1,13 +1,27 @@
 import { useState, useEffect } from 'react';
-import { Form, Input, Button, Typography, Card, Select, DatePicker, message, Spin, Divider } from 'antd';
+import {
+  Form,
+  Input,
+  Button,
+  Typography,
+  Card,
+  Select,
+  DatePicker,
+  message,
+  Spin,
+  Divider
+} from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import PayrollService from '../../services/payrollService';
 import EmployeeService from '../../services/employeeService';
 import dayjs from 'dayjs';
-import { formatCurrency } from '../../utils/helpers';
 
 const { Title } = Typography;
 const { Option } = Select;
+
+const formatCurrency = (amount) => {
+  return `$${Number(amount).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')}`;
+};
 
 const PayrollForm = () => {
   const [form] = Form.useForm();
@@ -38,9 +52,18 @@ const PayrollForm = () => {
     setLoading(true);
     try {
       const payroll = await PayrollService.getPayroll(id);
+      if (!payroll || !payroll.employee) {
+        throw new Error('Payroll data is incomplete');
+      }
+
+      const monthYear = dayjs()
+        .month(payroll.month - 1)
+        .year(payroll.year)
+        .date(1);
+
       form.setFieldsValue({
         employee: payroll.employee._id,
-        month: dayjs().month(payroll.month - 1).year(payroll.year),
+        month: monthYear,
         basicSalary: payroll.basicSalary,
         allowances: payroll.allowances,
         deductions: payroll.deductions,
@@ -48,30 +71,33 @@ const PayrollForm = () => {
         status: payroll.status
       });
     } catch (error) {
-      message.error('Failed to fetch payroll data');
+      message.error(error.message || 'Failed to load payroll data');
       navigate('/payroll');
     } finally {
       setLoading(false);
     }
   };
 
-  const calculateNetSalary = () => {
-    const values = form.getFieldsValue();
-    const basicSalary = values.basicSalary || 0;
-    const allowances = values.allowances || 0;
-    const deductions = values.deductions || 0;
-    const tax = values.tax || 0;
-    return basicSalary + allowances - deductions - tax;
-  };
+  // Use Form.useWatch for individual fields
+  const basicSalary = Form.useWatch('basicSalary', form) || 0;
+  const allowances = Form.useWatch('allowances', form) || 0;
+  const deductions = Form.useWatch('deductions', form) || 0;
+  const tax = Form.useWatch('tax', form) || 0;
+
+  const netSalary =
+    parseFloat(basicSalary) +
+    parseFloat(allowances) -
+    parseFloat(deductions) -
+    parseFloat(tax);
 
   const onFinish = async (values) => {
     setSubmitting(true);
     try {
       const payload = {
         ...values,
-        month: values.month.month() + 1, // JavaScript months are 0-indexed
+        month: values.month.month() + 1,
         year: values.month.year(),
-        netSalary: calculateNetSalary()
+        netSalary: netSalary
       };
 
       if (isEdit) {
@@ -139,35 +165,23 @@ const PayrollForm = () => {
               <Input type="number" prefix="$" />
             </Form.Item>
 
-            <Form.Item
-              name="allowances"
-              label="Allowances"
-            >
+            <Form.Item name="allowances" label="Allowances">
               <Input type="number" prefix="$" />
             </Form.Item>
 
-            <Form.Item
-              name="deductions"
-              label="Deductions"
-            >
+            <Form.Item name="deductions" label="Deductions">
               <Input type="number" prefix="$" />
             </Form.Item>
 
-            <Form.Item
-              name="tax"
-              label="Tax"
-            >
+            <Form.Item name="tax" label="Tax">
               <Input type="number" prefix="$" />
             </Form.Item>
 
-            <Form.Item
-              label="Net Salary"
-            >
-              <Input 
-                value={formatCurrency(calculateNetSalary())} 
-                prefix="$" 
-                readOnly 
-                style={{ fontWeight: 'bold' }}
+            <Form.Item label="Net Salary">
+              <Input
+                value={formatCurrency(netSalary)}
+                readOnly
+                style={{ fontWeight: 'bold', backgroundColor: '#f5f5f5' }}
               />
             </Form.Item>
 

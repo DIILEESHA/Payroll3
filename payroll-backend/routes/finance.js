@@ -1,4 +1,4 @@
-// backend/routes/finance.js
+// routes/finance.js
 const express = require('express');
 const router = express.Router();
 const {

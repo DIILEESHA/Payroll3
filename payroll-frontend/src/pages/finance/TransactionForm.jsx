@@ -43,7 +43,6 @@ const TransactionForm = () => {
         amount: transaction.amount,
         description: transaction.description,
         reference: transaction.reference,
-        relatedEmployee: transaction.relatedEmployee?._id,
         status: transaction.status,
         date: dayjs(transaction.date)
       });
@@ -129,7 +128,7 @@ const TransactionForm = () => {
               <Input />
             </Form.Item>
 
-            <Form.Item
+            {/* <Form.Item
               name="relatedEmployee"
               label="Related Employee"
             >
@@ -140,7 +139,7 @@ const TransactionForm = () => {
                   </Option>
                 ))}
               </Select>
-            </Form.Item>
+            </Form.Item> */}
 
             <Form.Item
               name="date"

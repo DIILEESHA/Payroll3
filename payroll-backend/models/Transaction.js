@@ -18,10 +18,7 @@ const TransactionSchema = new mongoose.Schema({
   reference: {
     type: String
   },
-  relatedEmployee: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Employee'
-  },
+
   status: {
     type: String,
     enum: ['pending', 'completed', 'failed'],

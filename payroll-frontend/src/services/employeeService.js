@@ -33,17 +33,7 @@ const createEmployee = async (employeeData) => {
   }
 };
 
-const updateEmployee = async (id, employeeData) => {
-  try {
-    const response = await api.put(`/employees/${id}`, employeeData);
-    return response.data.data;
-  } catch (error) {
-    throw error.response?.data || { 
-      message: error.message || 'Failed to update employee' 
-    };
-  }
-};
-
+// In EmployeeService.js
 const deleteEmployee = async (id) => {
   try {
     const response = await api.delete(`/employees/${id}`);
@@ -51,6 +41,17 @@ const deleteEmployee = async (id) => {
   } catch (error) {
     throw error.response?.data || { 
       message: error.message || 'Failed to delete employee' 
+    };
+  }
+};
+
+const updateEmployee = async (id, employeeData) => {
+  try {
+    const response = await api.put(`/employees/${id}`, employeeData);
+    return response.data.data;
+  } catch (error) {
+    throw error.response?.data || { 
+      message: error.message || 'Failed to update employee' 
     };
   }
 };

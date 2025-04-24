@@ -16,8 +16,19 @@ const createPayroll = async (payrollData) => {
 };
 
 const updatePayroll = async (id, payrollData) => {
-  const response = await api.put(`/payroll/${id}`, payrollData);
-  return response.data.data;
+  try {
+    const response = await api.put(`/payroll/${id}`, payrollData, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      }
+    });
+    return response.data.data;
+  } catch (error) {
+    throw error.response?.data || { 
+      message: error.message || 'Failed to update payroll' 
+    };
+  }
 };
 
 const deletePayroll = async (id) => {
@@ -31,10 +42,29 @@ const deletePayroll = async (id) => {
   }
 };
 
+const getPayroll = async (id) => {
+  try {
+    console.log('Making request to:', `/payroll/${id}`);
+    const response = await api.get(`/payroll/${id}`);
+    console.log('API response:', response.data);
+    return response.data.data;
+  } catch (error) {
+    console.error('API error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+    throw error.response?.data || { 
+      message: error.message || 'Failed to fetch payroll' 
+    };
+  }
+};
 export default {
   getAllPayrolls,
   getEmployeePayrolls,
   createPayroll,
+  getPayroll,  
+
   updatePayroll,
   deletePayroll
 };

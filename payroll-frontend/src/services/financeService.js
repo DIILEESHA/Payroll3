@@ -16,8 +16,14 @@ const updateTransaction = async (id, transactionData) => {
 };
 
 const deleteTransaction = async (id) => {
-  const response = await api.delete(`/finance/transactions/${id}`);
-  return response.data.data;
+  try {
+    const response = await api.delete(`/finance/transactions/${id}`);
+    return response.data; // Changed from response.data.data to match backend
+  } catch (error) {
+    throw error.response?.data || { 
+      message: error.message || 'Failed to delete transaction' 
+    };
+  }
 };
 
 const getFinancialSummary = async () => {

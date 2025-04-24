@@ -67,13 +67,15 @@ exports.deleteTransaction = asyncHandler(async (req, res) => {
     throw new Error('Transaction not found');
   }
 
-  await transaction.remove();
+  // Use findByIdAndDelete instead of remove
+  await Transaction.findByIdAndDelete(req.params.id);
 
   res.status(200).json({
     success: true,
     data: {}
   });
 });
+
 
 // @desc    Get financial summary
 // @route   GET /api/finance/summary

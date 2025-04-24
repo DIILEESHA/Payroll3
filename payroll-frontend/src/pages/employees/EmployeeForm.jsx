@@ -14,9 +14,22 @@ const EmployeeForm = () => {
   const { id } = useParams();
   const isEdit = !!id;
 
+  // 🔧 Auto-generate Employee ID
+  const generateEmployeeId = () => {
+    const timestamp = Date.now(); // Unique base
+    const randomPart = Math.floor(Math.random() * 1000);
+    return `EMP-${timestamp.toString().slice(-5)}${randomPart.toString().padStart(3, '0')}`;
+  };
+
   useEffect(() => {
     if (isEdit) {
       fetchEmployee();
+    } else {
+      // Set auto-generated ID for new employee
+      form.setFieldsValue({
+        employeeId: generateEmployeeId(),
+        role: 'employee'
+      });
     }
   }, [id]);
 
@@ -85,14 +98,13 @@ const EmployeeForm = () => {
             form={form}
             layout="vertical"
             onFinish={onFinish}
-            initialValues={{ role: 'employee' }}
           >
             <Form.Item
               name="employeeId"
               label="Employee ID"
               rules={[{ required: true, message: 'Please input employee ID!' }]}
             >
-              <Input placeholder="EMP-001" disabled={isEdit} />
+              <Input placeholder="EMP-001" disabled />
             </Form.Item>
 
             <Form.Item

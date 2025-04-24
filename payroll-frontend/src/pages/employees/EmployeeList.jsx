@@ -1,9 +1,12 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { Table, Space, Button, Card, Typography, message, Popconfirm, Input, Tag } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, DownloadOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import EmployeeService from '../../services/employeeService';
 import { formatCurrency } from '../../utils/helpers';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -22,7 +25,6 @@ const EmployeeList = () => {
     setLoading(true);
     try {
       const data = await EmployeeService.getAllEmployees();
-      // Ensure all required fields exist
       const validatedData = data.map(emp => ({
         _id: emp._id,
         employeeId: emp.employeeId || '',
@@ -45,7 +47,7 @@ const EmployeeList = () => {
       message.success('Employee deleted successfully');
       fetchEmployees();
     } catch (error) {
-      message.error('Failed to delete employee');
+      message.error(error.message || 'Failed to delete employee');
     }
   };
 
@@ -53,7 +55,24 @@ const EmployeeList = () => {
     setSearchText(value.toLowerCase());
   };
 
-  const filteredEmployees = employees.filter(emp => 
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    doc.text('Employee List', 14, 15);
+    autoTable(doc, {
+      startY: 20,
+      head: [['Employee ID', 'Full Name', 'Email', 'Salary', 'Role']],
+      body: filteredEmployees.map(emp => [
+        emp.employeeId,
+        emp.fullName,
+        emp.email,
+        `$${emp.salary.toLocaleString()}`,
+        emp.role.toUpperCase()
+      ])
+    });
+    doc.save('employee-list.pdf');
+  };
+
+  const filteredEmployees = employees.filter(emp =>
     emp.fullName.toLowerCase().includes(searchText) ||
     emp.email.toLowerCase().includes(searchText) ||
     emp.employeeId.toLowerCase().includes(searchText)
@@ -121,13 +140,22 @@ const EmployeeList = () => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
         <Title level={3}>Employee Management</Title>
-        <Button 
-          type="primary" 
-          icon={<PlusOutlined />}
-          onClick={() => navigate('/employees/add')}
-        >
-          Add Employee
-        </Button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <Button 
+            type="primary" 
+            icon={<PlusOutlined />}
+            onClick={() => navigate('/employees/add')}
+          >
+            Add Employee
+          </Button>
+          <Button 
+            type="default" 
+            icon={<DownloadOutlined />} 
+            onClick={handleDownloadPDF}
+          >
+            Download PDF
+          </Button>
+        </div>
       </div>
       <Card>
         <div style={{ marginBottom: 16 }}>
